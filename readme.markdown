@@ -315,10 +315,62 @@ with that name and a [umd](https://github.com/forbeslindesay/umd) wrapper.
 [insert-module-globals](http://npmjs.org/package/insert-module-globals)
 as the `opts.vars` parameter.
 
-## b.external(file)
+## b.external(file | bundle)
+
+### file
 
 Prevent `file` from being loaded into the current bundle, instead referencing
 from another bundle.
+
+### bundle
+
+Similar to `file`, however it will prevent any file which exists in the external
+bundle from being included in our bundle. This can be used to make "base" bundles
+which contain commonly used modules allowing for better browser caching.
+
+Lets say we have a site with two complex web apps (i.e. calendar and charting)
+
+Our current module dependency graph looks like this:
+
+```
+calendar.js
+  ./mycode.js
+  module_a
+    module_c
+  module_b
+```
+
+```
+charting.js
+  module_c
+  module_b
+```
+
+The above leads to modules a,b,c being duplicated in our js files. We can instead
+achieve quicker load times and smaller file sizes by putting those modules in their
+own file shared by both "apps". For this we would bundle module_a and module_b in
+a base file and reference them as externals when makings the bundles for calendar
+and charting.
+
+```
+base.js
+  module_a
+    module_c
+  module_b
+```
+
+```
+calendar.js
+  ./mycode.js
+```
+
+```
+charting.js
+```
+
+Notice that module_c, even tho not directly required in base.js but used in charting.js
+still exist in the base bundle. Bundle.external is smart enough to identify this and
+avoid including it again in charting.js
 
 ## b.ignore(file)
 
