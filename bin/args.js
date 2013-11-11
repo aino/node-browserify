@@ -15,6 +15,7 @@ module.exports = function (args) {
         .alias('standalone', 's')
         .alias('ig', 'fast')
         .alias('noparse', 'noParse')
+        .alias('lookup', 'l')
         .default('ig', false)
         .default('im', false)
         .default('dg', true) 
@@ -32,11 +33,23 @@ module.exports = function (args) {
         entries.push([].concat(argv.r, argv.require).filter(Boolean)[0]);
         argv.r = argv.require = [];
     }
+
+    var lookup = {};
+    [].concat(argv.l).concat(argv.lookup).filter(Boolean)
+        .forEach(function (l) {
+            var xs = l.split(':');
+            lookup[xs[0]] = {
+                modulesDir: xs[1],
+                manifest: xs[2]
+            }
+        })
+    ;
     
     var b = browserify({
         noParse: [].concat(argv.noparse).filter(Boolean),
         extensions: [].concat(argv.extension).filter(Boolean),
-        entries: entries
+        entries: entries,
+        lookup: lookup
     });
     b.argv = argv;
     

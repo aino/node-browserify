@@ -60,9 +60,27 @@ function Browserify (opts) {
     self._exposeAll = opts.exposeAll;
     self._ignoreMissing = opts.ignoreMissing;
     self._basedir = opts.basedir;
+    self._lookup = opts.lookup || {};
     
     var noParse = [].concat(opts.noParse).filter(Boolean);
     noParse.forEach(this.noParse.bind(this));
+}
+
+Browserify.prototype.modulesDir = function(id) {
+    var lookup = this._lookup[id];
+    if (lookup && lookup.modulesDir) {
+        return lookup.modulesDir;
+    }
+    return 'node_modules'
+}
+
+Browserify.prototype.manifest = function(id) {
+    var self = this;
+    var lookup = self._lookup[id];
+    if (lookup && lookup.manifest) {
+        return lookup.manifest;
+    }
+    return 'package.json'
 }
 
 Browserify.prototype.noParse = function(file) {
@@ -100,7 +118,9 @@ Browserify.prototype.require = function (id, opts) {
         filename: fromfile,
         modules: browserBuiltins,
         packageFilter: packageFilter,
-        extensions: self._extensions
+        extensions: self._extensions,
+        modulesDir: self.modulesDir(id),
+        manifest: self.manifest(id)
     };
     browserResolve(id, params, function (err, file) {
         if ((err || !file) && !opts.external) {
@@ -495,9 +515,11 @@ Browserify.prototype._resolve = function (id, parent, cb) {
     
     parent.modules = browserBuiltins;
     parent.extensions = self._extensions;
+    parent.modulesDir = self.modulesDir(id);
+    parent.manifest = self.manifest(id);
     
     if (self._external[id]) return cb(null, emptyModulePath);
-    
+
     return browserResolve(id, parent, function(err, file, pkg) {
         if (err) return cb(err);
         if (!file && (self._external[id] || self._external[file])) {
@@ -524,11 +546,11 @@ Browserify.prototype._resolve = function (id, parent, cb) {
         var dirs = parents(basedir);
         (function next () {
             var dir = dirs.shift();
-            if (dir === 'node_modules' || dir === undefined) {
+            if (dir === self.modulesDir(id) || dir === undefined) {
                 return cb(null, null, null);
             }
             
-            var pkgfile = path.join(dir, 'package.json');
+            var pkgfile = path.join(dir, self.manifest(id));
             if (self._pkgcache[pkgfile]) {
                 cb(null, pkgfile, self._pkgcache[pkgfile]);
             }

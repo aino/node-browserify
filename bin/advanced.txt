@@ -39,3 +39,10 @@ Advanced Options:
     Consider files with specified EXTENSION as modules, this option can used
     multiple times.
 
+  --lookup, --l                     [default: <<module>>:node_modules:package.json]
+
+    Specifies the module directory and manifest file to search for when
+    requiring a module. For example. `react:bower_components:bower.json`, where
+    `react` is the module, `bower_components` the module directory and
+    `bower.json` the manifest file.
+
