@@ -17,8 +17,9 @@ tag.
 
 Whip up a file, `main.js` with some `require()s` in it. You can use relative
 paths like `'./foo.js'` and `'../lib/bar.js'` or module paths like `'gamma'`
-that will search `node_modules/` using
-[node's module lookup algorithm](https://github.com/substack/node-resolve).
+that will search a modules directory such as `node_modules` or
+`bower_components` using
+[module lookup algorithm](https://github.com/substack/node-resolve).
 
 ``` js
 var foo = require('./foo.js');
@@ -209,6 +210,18 @@ Advanced Options:
  
     Print each file in the dependency graph. Useful for makefiles.
 
+  --extension=EXTENSION
+
+    Consider files with specified EXTENSION as modules, this option can used
+    multiple times.
+
+  --lookup, --l                     [default: <<module>>:node_modules:package.json]
+
+    Specifies the module directory and manifest file to search for when
+    requiring a module. For example. `react:bower_components:bower.json`, where
+    `react` is the module, `bower_components` the module directory and
+    `bower.json` the manifest file.
+
 ```
 
 # compatibility
@@ -270,6 +283,11 @@ to parse.
 machinery to use when the extension has not been specified.
 By default browserify considers only `.js` and `.json` files in such cases.
 
+`opts.lookup` is an object that specifies the module directory ,`modulesDir`,
+and manifest, `manifest`, file to search for when requiring a module. For
+example.  `{react: {modulesDir: "bower_components", manifest: "bower.json"},
+jquery: {modulesDir: "components"}}`
+
 Note that if files do not contain javascript source code then you also need to
 specify a corresponding transform for them.
 
@@ -321,6 +339,8 @@ as the `opts.vars` parameter.
 
 Prevent `file` from being loaded into the current bundle, instead referencing
 from another bundle.
+
+The `file` param is anything that can be resolved by `require.resolve()`.
 
 ### bundle
 
