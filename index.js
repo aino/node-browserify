@@ -141,7 +141,7 @@ Browserify.prototype.require = function (id, opts) {
         
         if (opts.external) {
             if (file) self._external[file] = true;
-            else self._external[id] = true;
+            self._external[id] = true;
         }
         else {
             self.files.push(file);
